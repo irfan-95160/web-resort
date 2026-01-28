@@ -1,0 +1,276 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-speedometer2 me-2"></i> Admin Dashboard</h2>
+    <div>
+        <!-- ปุ่มเปิด Modal จัดการ Admin -->
+        <button type="button" class="btn btn-outline-dark rounded-pill me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#manageAdminModal">
+            <i class="bi bi-person-gear me-1"></i> จัดการผู้ดูแลระบบ
+        </button>
+        <span class="badge bg-primary fs-6 px-3 py-2">Administrator</span>
+    </div>
+</div>
+
+<!-- ส่วนแสดงสถิติ (Cards) -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card bg-success text-white h-100 shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 text-uppercase mb-2">รายได้รวม</h6>
+                        <h3 class="fw-bold mb-0">฿{{ "{:,.0f}".format(total_sales) }}</h3>
+                    </div>
+                    <i class="bi bi-currency-dollar display-6 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white h-100 shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 text-uppercase mb-2">Admin ทั้งหมด</h6>
+                        <h3 class="fw-bold mb-0">{{ admins|length }} ท่าน</h3>
+                    </div>
+                    <i class="bi bi-people-fill display-6 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark h-100 shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-dark-50 text-uppercase mb-2">ห้องที่ถูกจอง</h6>
+                        <h3 class="fw-bold mb-0">{{ booked_rooms|length }} ห้อง</h3>
+                    </div>
+                    <i class="bi bi-door-closed-fill display-6 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white h-100 shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 text-uppercase mb-2">ห้องว่าง</h6>
+                        <h3 class="fw-bold mb-0">{{ available_rooms|length }} ห้อง</h3>
+                    </div>
+                    <i class="bi bi-door-open-fill display-6 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ตารางรายการรอตรวจสอบ -->
+<div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-white py-3 border-0 d-flex align-items-center">
+        <h5 class="mb-0 fw-bold text-danger"><i class="bi bi-exclamation-circle me-2"></i> รายการรอตรวจสอบการชำระเงิน</h5>
+        <span class="badge bg-danger rounded-pill ms-2">{{ payments|length }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light text-secondary text-uppercase small">
+                <tr>
+                    <th class="ps-4">Pay ID</th>
+                    <th>ลูกค้า</th>
+                    <th>ยอดโอน / ยอดจริง</th>
+                    <th>หลักฐาน</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody class="border-top-0">
+                {% for p in payments %}
+                <tr>
+                    <td class="ps-4 fw-bold">#{{ p['Pay_ID'] }}</td>
+                    <td>
+                        <div class="fw-bold">{{ p['F_name'] }} {{ p['Lname'] }}</div>
+                        <small class="text-muted">Booking ID: {{ p['Booking_ID'] }}</small>
+                    </td>
+                    <td>
+                        <span class="text-success fw-bold">฿{{ "{:,.0f}".format(p['Pay_Amount']) }}</span>
+                        <span class="text-muted small">/ {{ "{:,.0f}".format(p['Total_Price']) }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ p['Pay_Slip'] }}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill">
+                            <i class="bi bi-image me-1"></i> ดูสลิป
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/admin/approve/{{ p['Pay_ID'] }}" class="btn btn-success btn-sm rounded-pill px-3 me-1">
+                            <i class="bi bi-check-lg me-1"></i> อนุมัติ
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <i class="bi bi-check-circle display-4 d-block mb-3 text-success"></i>
+                        ไม่มีรายการค้างตรวจสอบ
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ส่วนแสดงสถานะห้องพัก (2 คอลัมน์) -->
+<div class="row g-4">
+    <!-- รายการห้องที่จองแล้ว -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-warning bg-opacity-10 py-3 border-0">
+                <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-bookmark-check-fill me-2"></i> รายการห้องที่ถูกจอง (Active)</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="small text-muted">
+                        <tr>
+                            <th class="ps-4">ห้อง</th>
+                            <th>ประเภท</th>
+                            <th>ลูกค้า</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in booked_rooms %}
+                        <tr>
+                            <td class="ps-4"><span class="badge bg-dark rounded-pill">{{ r['Room_Number'] }}</span></td>
+                            <td><small>{{ r['Type_Name'] }}</small></td>
+                            <td>
+                                <div class="fw-bold small">{{ r['F_name'] }}</div>
+                                <small class="text-muted" style="font-size: 0.75rem;">Check-out: {{ r['Check_Out'] }}</small>
+                            </td>
+                            <td>
+                                <span class="badge {% if r['Booking_Status'] == 'Paid' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                    {{ r['Booking_Status'] }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center py-3 text-muted">ไม่มีห้องที่ถูกจองในขณะนี้</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- รายการห้องว่าง -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-success bg-opacity-10 py-3 border-0">
+                <h5 class="mb-0 fw-bold text-success"><i class="bi bi-check-circle-fill me-2"></i> รายการห้องว่างพร้อมขาย</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="small text-muted">
+                        <tr>
+                            <th class="ps-4">ห้อง</th>
+                            <th>ประเภท</th>
+                            <th>ราคา/คืน</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in available_rooms %}
+                        <tr>
+                            <td class="ps-4"><span class="badge bg-success rounded-pill">{{ r['Room_Number'] }}</span></td>
+                            <td><small>{{ r['Type_Name'] }}</small></td>
+                            <td class="fw-bold text-primary">฿{{ "{:,.0f}".format(r['Price_Night']) }}</td>
+                            <td><span class="badge bg-light text-success border border-success">ว่าง</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center py-3 text-muted">ไม่มีห้องว่าง (เต็มทุกห้อง)</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal จัดการ Admin (เพิ่ม/ลบ) -->
+<div class="modal fade" id="manageAdminModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-person-gear me-2"></i> จัดการผู้ดูแลระบบ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- ส่วนที่ 1: รายชื่อ Admin ปัจจุบัน -->
+                <h6 class="fw-bold text-primary mb-3">รายชื่อผู้ดูแลระบบปัจจุบัน</h6>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>ชื่อ-นามสกุล</th>
+                                <th>อีเมล</th>
+                                <th class="text-center" style="width: 100px;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for admin in admins %}
+                            <tr>
+                                <td>{{ admin['F_name'] }} {{ admin['Lname'] }}</td>
+                                <td>{{ admin['Email'] }}</td>
+                                <td class="text-center">
+                                    {% if admin['Email'] == 'owner@hotel.com' %}
+                                        <span class="badge bg-secondary">Owner</span>
+                                    {% else %}
+                                        <form action="/admin/delete_admin" method="POST" onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบสิทธิ์ผู้ดูแลระบบคนนี้?');">
+                                            <input type="hidden" name="email" value="{{ admin['Email'] }}">
+                                            <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3">
+                                                <i class="bi bi-trash"></i> ลบ
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- ส่วนที่ 2: ฟอร์มเพิ่ม Admin ใหม่ -->
+                <h6 class="fw-bold text-success mb-3"><i class="bi bi-plus-circle me-2"></i>เพิ่มผู้ดูแลระบบใหม่</h6>
+                <div class="card bg-light border-0 p-3">
+                    <form action="/admin/add_admin" method="POST">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">ชื่อ</label>
+                                <input type="text" name="f_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">นามสกุล</label>
+                                <input type="text" name="l_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">อีเมล (Login)</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">รหัสผ่าน</label>
+                                <input type="password" name="password" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <input type="hidden" name="phone" value="0000000000">
+                                <button type="submit" class="btn btn-dark w-100 rounded-pill fw-bold">บันทึกข้อมูล</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

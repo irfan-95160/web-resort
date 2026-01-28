@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white p-4">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-wallet2 me-2"></i> แจ้งชำระเงิน</h4>
+                <small class="opacity-75">Booking ID: #{{ booking['Booking_ID'] }}</small>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-light border text-center mb-4">
+                    <small class="text-muted">ยอดที่ต้องชำระ</small>
+                    <h2 class="text-primary fw-bold mb-0">฿{{ "{:,.0f}".format(booking['Total_Price']) }}</h2>
+                </div>
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">จำนวนเงินที่โอน</label>
+                        <input type="number" name="amount" class="form-control form-control-lg bg-light border-0" value="{{ booking['Total_Price'] }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">ช่องทางชำระเงิน</label>
+                        <select name="method" class="form-select form-select-lg bg-light border-0">
+                            <option value="Bank Transfer">โอนผ่านธนาคาร (K-Bank)</option>
+                            <option value="Credit Card">บัตรเครดิต</option>
+                            <option value="PromptPay">พร้อมเพย์</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-muted">หลักฐานการโอน (URL รูปภาพ)</label>
+                        <input type="text" name="slip_url" class="form-control form-control-lg bg-light border-0" placeholder="https://..." required>
+                        <div class="form-text">ในการใช้งานจริงจะเป็นปุ่ม Upload File</div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-3 fw-bold shadow-sm">
+                        <i class="bi bi-send-check me-2"></i> ยืนยันการโอนเงิน
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="position-relative p-5 text-center text-white mb-5 rounded-4 shadow overflow-hidden" 
+     style="background: url('https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat; height: 500px;">
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.4);"></div>
+    <div class="position-relative d-flex flex-column justify-content-center h-100 align-items-center">
+        <h1 class="display-3 fw-bold mb-3">Welcome to Fahsai Resort</h1>
+        <p class="lead fs-4 mb-4">ปล่อยกาย ปล่อยใจ ไปกับเสียงคลื่นและสายลม</p>
+        <a href="#rooms" class="btn btn-light btn-lg px-5 rounded-pill fw-bold text-dark shadow-sm">จองห้องพักเลย</a>
+    </div>
+</div>
+
+<div id="rooms" class="py-4">
+    <div class="text-center mb-5">
+        <h6 class="text-primary fw-bold text-uppercase ls-2">Accommodation</h6>
+        <h2 class="display-5 fw-bold">ห้องพักของเรา</h2>
+        <div class="mx-auto mt-3" style="width: 60px; height: 3px; background-color: var(--resort-gold);"></div>
+    </div>
+
+    <div class="row g-4">
+        {% for type in room_types %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="position-relative">
+                    <img src="{{ type['Image_URL'] }}" class="card-img-top" alt="{{ type['Type_Name'] }}" style="height: 250px; object-fit: cover;">
+                    <div class="position-absolute bottom-0 end-0 bg-white px-3 py-1 m-3 rounded-pill shadow-sm fw-bold text-primary">
+                        ฿{{ "{:,.0f}".format(type['Price_Night']) }} / คืน
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <h4 class="card-title fw-bold mb-3">{{ type['Type_Name'] }}</h4>
+                    <p class="card-text text-muted mb-4" style="min-height: 3rem;">{{ type['Description'] }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <small class="text-muted"><i class="bi bi-people-fill me-1"></i> สูงสุด {{ type['Max_Guest'] }} ท่าน</small>
+                        <a href="/room/{{ type['Type_ID'] }}" class="btn btn-outline-primary rounded-pill px-4">ดูรายละเอียด</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

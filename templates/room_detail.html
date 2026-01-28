@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row g-5">
+    <!-- Image Section -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm overflow-hidden">
+            <img src="{{ room['Image_URL'] }}" class="img-fluid" alt="{{ room['Type_Name'] }}" style="width: 100%; height: 500px; object-fit: cover;">
+        </div>
+        <div class="mt-4">
+            <h2 class="fw-bold mb-3">{{ room['Type_Name'] }}</h2>
+            <p class="lead text-muted">{{ room['Description'] }}</p>
+            
+            <h5 class="fw-bold mt-4 mb-3">สิ่งอำนวยความสะดวก</h5>
+            <div class="row g-3">
+                <div class="col-6 col-md-4"><i class="bi bi-wifi text-primary me-2"></i> ฟรี Wi-Fi</div>
+                <div class="col-6 col-md-4"><i class="bi bi-cup-hot text-primary me-2"></i> อาหารเช้า</div>
+                <div class="col-6 col-md-4"><i class="bi bi-snow text-primary me-2"></i> เครื่องปรับอากาศ</div>
+                <div class="col-6 col-md-4"><i class="bi bi-tv text-primary me-2"></i> Smart TV</div>
+                <div class="col-6 col-md-4"><i class="bi bi-safe text-primary me-2"></i> ตู้นิรภัย</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Sidebar -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-lg sticky-top" style="top: 100px;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="text-muted">ราคาเริ่มต้น</span>
+                    <div>
+                        <span class="display-6 fw-bold text-primary">฿{{ "{:,.0f}".format(room['Price_Night']) }}</span>
+                        <span class="text-muted">/ คืน</span>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-uppercase">เช็คอิน</label>
+                            <input type="date" name="check_in" class="form-control bg-light border-0 p-3" required min="{{ today }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-uppercase">เช็คเอาท์</label>
+                            <input type="date" name="check_out" class="form-control bg-light border-0 p-3" required>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary w-100 py-3 fs-5 shadow-sm">
+                                <i class="bi bi-calendar-check me-2"></i> ยืนยันการจอง
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="mt-4 text-center text-muted small">
+                    <i class="bi bi-shield-check me-1"></i> รับประกันราคาดีที่สุด
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

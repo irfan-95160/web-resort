@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fahsai Resort | ฟ้าทราย รีสอร์ท</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --resort-blue: #0A4D68;
+            --resort-sand: #F2F2F2;
+            --resort-gold: #D4AF37;
+        }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f8fcfd;
+            color: #333;
+        }
+        h1, h2, h3, .navbar-brand {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        /* Navbar Styling */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            color: var(--resort-blue) !important;
+            font-weight: 700;
+        }
+        .nav-link {
+            color: #555 !important;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--resort-blue) !important;
+        }
+        
+        /* Card Styling */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--resort-blue);
+            border-color: var(--resort-blue);
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            background-color: #083c52;
+            border-color: #083c52;
+        }
+        .btn-outline-primary {
+            color: var(--resort-blue);
+            border-color: var(--resort-blue);
+            border-radius: 50px;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--resort-blue);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--resort-blue);
+            color: white;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-water me-2"></i>Fahsai Resort
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/">หน้าแรก</a></li>
+                    {% if session.get('user_id') %}
+                        {% if session.get('is_admin') %}
+                            <li class="nav-item"><a class="nav-link text-danger" href="/admin">ผู้ดูแลระบบ</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="/my_bookings">การจองของฉัน</a></li>
+                        {% endif %}
+                        <li class="nav-item ms-lg-3">
+                            <a class="btn btn-outline-danger btn-sm px-4" href="/logout">ออกจากระบบ</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="/login">เข้าสู่ระบบ</a></li>
+                        <li class="nav-item ms-lg-2">
+                            <a class="btn btn-primary btn-sm text-white px-4" href="/register">สมัครสมาชิก</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div style="margin-top: 80px;"></div>
+
+    <div class="container py-4 flex-grow-1">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0" role="alert">
+                                <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="py-5 mt-auto text-center">
+        <div class="container">
+            <h4 class="mb-3" style="font-family: 'Playfair Display', serif;">Fahsai Resort</h4>
+            <p class="text-white-50 mb-4">สัมผัสประสบการณ์การพักผ่อนที่เหนือระดับ ท่ามกลางธรรมชาติและท้องทะเล</p>
+            <div class="d-flex justify-content-center gap-3 mb-4">
+                <a href="#" class="text-white"><i class="bi bi-facebook fs-5"></i></a>
+                <a href="#" class="text-white"><i class="bi bi-instagram fs-5"></i></a>
+                <a href="#" class="text-white"><i class="bi bi-line fs-5"></i></a>
+            </div>
+            <small class="text-white-50">&copy; 2024 Fahsai Resort. All Rights Reserved.</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

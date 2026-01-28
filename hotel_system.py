@@ -1,8 +1,10 @@
 import sqlite3
 import datetime
 import os
+import time
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 # ==========================================
 # CONFIGURATION & SETUP
@@ -10,6 +12,18 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = 'fahsai_resort_secret_key'
 DB_NAME = 'hotel_database.db'
+
+# ตั้งค่าการอัปโหลดไฟล์
+UPLOAD_FOLDER = 'static/uploads' # โฟลเดอร์สำหรับเก็บไฟล์สลิป
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# สร้างโฟลเดอร์เก็บรูปถ้ายังไม่มี
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # ==========================================
 # DATABASE MANAGEMENT (SQLite)
@@ -138,12 +152,11 @@ def register():
         email = request.form['email']
         password = generate_password_hash(request.form['password'])
         phone = request.form['phone']
-        # ตัดส่วนรับค่า Address ออก
+        # Address removed
         reg_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
         conn = get_db_connection()
         try:
-            # ตัด Address ออกจากคำสั่ง SQL Insert
             conn.execute('INSERT INTO Customer (F_name, Lname, Email, Password, Phonenumber, Reg_date) VALUES (?, ?, ?, ?, ?, ?)',
                          (f_name, l_name, email, password, phone, reg_date))
             conn.commit()
@@ -278,19 +291,43 @@ def payment(booking_id):
     if request.method == 'POST':
         amount = request.form['amount']
         method = request.form['method']
-        slip_url = request.form['slip_url']
-        pay_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # รับไฟล์จากฟอร์ม
+        if 'slip_image' not in request.files:
+            flash('กรุณาเลือกไฟล์รูปภาพสลิปการโอน', 'danger')
+            return redirect(request.url)
+            
+        file = request.files['slip_image']
+        
+        if file.filename == '':
+            flash('ไม่ได้เลือกไฟล์', 'danger')
+            return redirect(request.url)
+            
+        if file and allowed_file(file.filename):
+            # ตั้งชื่อไฟล์ใหม่: slip_bookingID_timestamp.extension
+            file_ext = file.filename.rsplit('.', 1)[1].lower()
+            new_filename = f"slip_{booking_id}_{int(time.time())}.{file_ext}"
+            filename = secure_filename(new_filename)
+            
+            # บันทึกไฟล์
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            # สร้าง URL เพื่อเก็บลง DB (เช่น /static/uploads/slip_1_12345.jpg)
+            slip_url = f"/{UPLOAD_FOLDER}/{filename}"
+            pay_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        conn.execute('''INSERT INTO Payment (Booking_ID, Pay_Amount, Pay_Method, Pay_Date, Pay_Slip, Pay_Status)
-                        VALUES (?, ?, ?, ?, ?, 'Pending')''', 
-                     (booking_id, amount, method, pay_date, slip_url))
-        
-        conn.execute("UPDATE Booking SET Booking_Status = 'Verifying' WHERE Booking_ID = ?", (booking_id,))
-        
-        conn.commit()
-        conn.close()
-        flash('ส่งหลักฐานการชำระเงินเรียบร้อย รอการตรวจสอบสักครู่', 'success')
-        return redirect(url_for('my_bookings'))
+            conn.execute('''INSERT INTO Payment (Booking_ID, Pay_Amount, Pay_Method, Pay_Date, Pay_Slip, Pay_Status)
+                            VALUES (?, ?, ?, ?, ?, 'Pending')''', 
+                         (booking_id, amount, method, pay_date, slip_url))
+            
+            conn.execute("UPDATE Booking SET Booking_Status = 'Verifying' WHERE Booking_ID = ?", (booking_id,))
+            
+            conn.commit()
+            conn.close()
+            flash('อัปโหลดสลิปเรียบร้อย รอการตรวจสอบสักครู่', 'success')
+            return redirect(url_for('my_bookings'))
+        else:
+            flash('รองรับเฉพาะไฟล์รูปภาพ (png, jpg, jpeg, gif) เท่านั้น', 'danger')
 
     conn.close()
     return render_template('payment.html', booking=booking)

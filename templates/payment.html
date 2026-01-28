@@ -13,7 +13,8 @@
                     <h2 class="text-primary fw-bold mb-0">฿{{ "{:,.0f}".format(booking['Total_Price']) }}</h2>
                 </div>
 
-                <form method="POST">
+                <!-- สำคัญ: ต้องมี enctype="multipart/form-data" เพื่อรองรับการอัปโหลดไฟล์ -->
+                <form method="POST" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label class="form-label text-muted">จำนวนเงินที่โอน</label>
                         <input type="number" name="amount" class="form-control form-control-lg bg-light border-0" value="{{ booking['Total_Price'] }}" required>
@@ -27,9 +28,10 @@
                         </select>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label text-muted">หลักฐานการโอน (URL รูปภาพ)</label>
-                        <input type="text" name="slip_url" class="form-control form-control-lg bg-light border-0" placeholder="https://..." required>
-                        <div class="form-text">ในการใช้งานจริงจะเป็นปุ่ม Upload File</div>
+                        <label class="form-label text-muted">หลักฐานการโอน (รูปภาพสลิป)</label>
+                        <!-- เปลี่ยนเป็น input type="file" -->
+                        <input type="file" name="slip_image" class="form-control form-control-lg bg-light border-0" accept="image/*" required>
+                        <div class="form-text">รองรับไฟล์ภาพ .jpg, .jpeg, .png</div>
                     </div>
                     <button type="submit" class="btn btn-success w-100 py-3 fw-bold shadow-sm">
                         <i class="bi bi-send-check me-2"></i> ยืนยันการโอนเงิน
